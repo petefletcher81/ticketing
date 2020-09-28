@@ -1,0 +1,25 @@
+apiVersion: skaffold/v2alpha3
+kind: Config
+deploy:
+  # this will list all the config files we want to load into cluster
+  kubectl:
+    manifests:
+      - ./infra/k8s/*
+build:
+  local:
+    # whenever we build an image do not push to docker hub
+    push: false
+  artifacts:
+    # nees to list out all the images that are going to be built
+    - image: petefletcher/auth
+      context: auth
+      docker:
+        dockerfile: Dockerfile
+      # sync will tell skaffold how to handle any files that change inside
+      sync:
+        manual:
+          - src: "src/**/*.ts"
+            # where to sync inside our running container
+            dest: .
+            # the dot just references whereever we got the file from and place
+            # it in the same place

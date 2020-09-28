@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-depl
+spec:
+  replicas: 1
+  # the purpose of selector is to tell the deployment
+  # how to find the pods its going to create
+  selector:
+    matchLabels:
+      app: auth
+  # how to create each individual pod this deployment
+  # is going to create
+  template:
+    metadata:
+      # this should match with the label on line 11
+      labels:
+        app: auth
+    # this will tell the pod how to behave
+    spec:
+      # designate containers
+      containers:
+        #name is only important for logging
+        - name: auth
+          image: petefletcher/auth
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-srv
+  # tell the service how to behave
+spec:
+  selector:
+    # service will find all the pods with the label of
+    app: auth
+  ports:
+    - name: auth
+      protocol: TCP
+      # this should match with the port in express file
+      port: 3000
+      targetPort: 3000
