@@ -1,0 +1,25 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-service
+  # this helps the ingress controller understand we are trying to feed rewriting rules
+  # once it finds the annotations - it knows
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    # this tells nginx we will have regex in the paths
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  # this will contain all the rules we will need to route to the different
+  # pods
+  rules:
+    # pretend domain name
+    # only will work locally
+    - host: ticketing.dev
+      http:
+        paths:
+          # request to cluster of this
+          - path: /api/users/?(.*)
+            # sent to this backend
+            backend:
+              serviceName: auth-srv
+              servicePort: 3000
