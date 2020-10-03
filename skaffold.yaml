@@ -10,7 +10,7 @@ build:
     # whenever we build an image do not push to docker hub
     push: false
   artifacts:
-    # nees to list out all the images that are going to be built
+    # needs to list out all the images that are going to be built
     - image: petefletcher/auth
       context: auth
       docker:
