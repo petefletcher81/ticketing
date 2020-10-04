@@ -1,7 +1,8 @@
 import express, { Request, Response } from "express";
+import { User } from "../models/user";
 import { body, validationResult } from "express-validator";
 import { RequestValidationError } from "../errors/requestValidationError";
-import { DatabaseConnectionError } from "../errors/databaseConnectionError";
+import { BadRequestError } from "../errors/bad-request-error";
 // create a router to set up routes
 const router = express.Router();
 
@@ -14,7 +15,7 @@ router.post(
       .isLength({ min: 4, max: 20 })
       .withMessage("Password must be between 4 and 20 characters"),
   ],
-  (req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
     // look as req object
     const errors = validationResult(req);
 
@@ -25,9 +26,22 @@ router.post(
     }
 
     const { email, password } = req.body;
-    console.log("Creating a user");
-    throw new DatabaseConnectionError();
-    res.send("Yeah yup!");
+    // checks mongoose model for existing
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      throw new BadRequestError("Email already in use");
+    }
+
+    // this just builds the user payload
+    const user = User.build({
+      email,
+      password,
+    });
+    // save to db
+    await user.save();
+
+    res.status(201).send(user);
   }
 );
 
