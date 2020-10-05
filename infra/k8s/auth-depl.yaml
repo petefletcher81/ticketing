@@ -23,6 +23,13 @@ spec:
         #name is only important for logging
         - name: auth
           image: petefletcher/auth
+          # env vars
+          env:
+            - name: jwt_key
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: jwt_key
 ---
 apiVersion: v1
 kind: Service

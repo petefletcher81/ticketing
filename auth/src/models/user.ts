@@ -19,17 +19,31 @@ interface UserDoc extends mongoose.Document {
 }
 
 // schema is a how we tell mongoose about all the properties we are going to have
-const userSchema = new mongoose.Schema({
-  email: {
-    // this is not tied to TS --> mongoose only --> referring to constructor
-    type: String,
-    required: true,
+const userSchema = new mongoose.Schema(
+  {
+    email: {
+      // this is not tied to TS --> mongoose only --> referring to constructor
+      type: String,
+      required: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
   },
-  password: {
-    type: String,
-    required: true,
-  },
-});
+  {
+    toJSON: {
+      // use this to format the response
+      // we are defining how it should be viewed (view level logic)
+      transform(doc, ret) {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.password;
+        delete ret.__v;
+      },
+    },
+  }
+);
 
 // pre is a mongoose middleware and allows us to
 // run this function before we build the user

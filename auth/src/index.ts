@@ -2,6 +2,7 @@ import express from "express";
 import "express-async-errors";
 import { json } from "body-parser";
 import mongoose from "mongoose";
+import cookieSession from "cookie-session";
 
 import { currentUserRouter } from "./routes/current-user";
 import { signinRouter } from "./routes/signin";
@@ -11,7 +12,19 @@ import { errorHandler } from "./middlewares/error-handler";
 import { NotFoundError } from "./errors/not-found-error";
 
 const app = express();
+
+// traffic will be proxied through nginx
+// express will set this and not trust it by default
+app.set("trust proxy", true);
 app.use(json());
+// disable encryption
+// JWT is already tamper resistent
+app.use(
+  cookieSession({
+    signed: false,
+    secure: true,
+  })
+);
 
 app.use(currentUserRouter);
 app.use(signinRouter);
@@ -27,6 +40,10 @@ app.all("*", async () => {
 app.use(errorHandler);
 
 const start = async () => {
+  // best place to check the env vars
+  if (!process.env.jwt_key) {
+    throw new Error("jwt_key must be defined");
+  }
   // within the mongo depl -- find the service name to connect to
   try {
     await mongoose.connect("mongodb://auth-mongo-srv:27017/auth", {

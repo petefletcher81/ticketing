@@ -1,8 +1,10 @@
 import express, { Request, Response } from "express";
 import { User } from "../models/user";
-import { body, validationResult } from "express-validator";
-import { RequestValidationError } from "../errors/requestValidationError";
+import { body } from "express-validator";
+
 import { BadRequestError } from "../errors/bad-request-error";
+import { validationRequest } from "../middlewares/validate-request";
+import jwt from "jsonwebtoken";
 // create a router to set up routes
 const router = express.Router();
 
@@ -15,16 +17,8 @@ router.post(
       .isLength({ min: 4, max: 20 })
       .withMessage("Password must be between 4 and 20 characters"),
   ],
+  validationRequest,
   async (req: Request, res: Response) => {
-    // look as req object
-    const errors = validationResult(req);
-
-    // check for errors
-    if (!errors.isEmpty()) {
-      // errors array - safely sends data back to user as an array within the json
-      throw new RequestValidationError(errors.array());
-    }
-
     const { email, password } = req.body;
     // checks mongoose model for existing
     const existingUser = await User.findOne({ email });
@@ -40,6 +34,20 @@ router.post(
     });
     // save to db
     await user.save();
+    // generate jwt and store on session object
+    // we defined the the env var --> addin ! tells TS we have checked this
+    const userJwt = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+      },
+      process.env.jwt_key!
+    );
+
+    // TS wants us to recreate the object
+    req.session = {
+      jwt: userJwt,
+    };
 
     res.status(201).send(user);
   }
