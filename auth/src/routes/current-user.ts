@@ -1,9 +1,6 @@
 import express from "express";
 
-import jwt from "jsonwebtoken";
-
 import { currentUser } from "../middlewares/current-user";
-import { requireAuth } from "../middlewares/require-auth";
 // create a router to set up routes
 const router = express.Router();
 

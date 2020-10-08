@@ -23,3 +23,16 @@ build:
             dest: .
             # the dot just references whereever we got the file from and place
             # it in the same place
+    # needs to list out all the images that are going to be built
+    - image: petefletcher/client
+      context: client
+      docker:
+        dockerfile: Dockerfile
+      # sync will tell skaffold how to handle any files that change inside
+      sync:
+        manual:
+          - src: "src/**/*.js"
+            # where to sync inside our running container
+            dest: .
+            # the dot just references whereever we got the file from and place
+            # it in the same place

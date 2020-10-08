@@ -18,8 +18,15 @@ spec:
       http:
         paths:
           # request to cluster of this
+          # list array of diff paths
+          # whenever a request comes into nginx it will look through in order
           - path: /api/users/?(.*)
             # sent to this backend
             backend:
               serviceName: auth-srv
+              servicePort: 3000
+          - path: /?(.*)
+            # client service will always be listed at the very bottom
+            backend:
+              serviceName: client-srv
               servicePort: 3000
